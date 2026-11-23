@@ -1,4 +1,4 @@
-"""Portable Njord checkpoints: tensors and plain values only, loadable with weights_only=True."""
+"""Portable Vetra checkpoints: tensors and plain values only, loadable with weights_only=True."""
 
 from __future__ import annotations
 
@@ -8,16 +8,16 @@ from pathlib import Path
 import numpy as np
 import torch
 
-from njord.data import SpectrumTransform, WindStats
-from njord.hs_gain import HsGain
-from njord.models import Njord, build_model
+from vetra.data import SpectrumTransform, WindStats
+from vetra.hs_gain import HsGain
+from vetra.models import Vetra, build_model
 
 MODEL_KEYS = ("unet_out", "feature_hw", "decoder_width", "decoder_dropout", "large_window", "local_window")
 
 
 @dataclass
 class Pretrained:
-    model: Njord
+    model: Vetra
     large_stats: WindStats
     local_stats: WindStats
     target_transform: SpectrumTransform
@@ -31,7 +31,7 @@ class Pretrained:
         """Spectra (N, 36, 24) in physical units from N pairs of wind windows.
 
         ``large`` is (N, large_window, 2, H, W) and ``local`` is (N, local_window, 2, h, w),
-        signed-square winds as in ``njord.data``, each window ending at the time of the spectrum.
+        signed-square winds as in ``vetra.data``, each window ending at the time of the spectrum.
         Negative values are set to zero; Hs-Gain is applied when the checkpoint has one.
         """
         device = next(self.model.parameters()).device
@@ -56,11 +56,11 @@ def _tensors_to_stats(values: dict) -> WindStats:
     return WindStats(mean=values["mean"].numpy(), std=values["std"].numpy())
 
 
-def save_checkpoint(path: str | Path, model: Njord, config: dict, large_stats: WindStats, local_stats: WindStats,
+def save_checkpoint(path: str | Path, model: Vetra, config: dict, large_stats: WindStats, local_stats: WindStats,
                     target_transform: SpectrumTransform, site: dict | None = None,
                     hs_gain: HsGain | None = None, extra: dict | None = None) -> None:
     payload = {
-        "format": "njord-checkpoint-v1",
+        "format": "vetra-checkpoint-v1",
         "model_state_dict": {k: v.detach().cpu() for k, v in model.state_dict().items()},
         "config": {**{k: config[k] for k in MODEL_KEYS if k in config},
                    "freq_num": model.freq_num, "direction_num": model.direction_num},
@@ -76,10 +76,10 @@ def save_checkpoint(path: str | Path, model: Njord, config: dict, large_stats: W
 
 
 def load_checkpoint(path: str | Path, device: str | torch.device = "cpu") -> Pretrained:
-    """Load a Njord checkpoint: the model in eval mode plus everything needed to prepare inputs."""
+    """Load a Vetra checkpoint: the model in eval mode plus everything needed to prepare inputs."""
     payload = torch.load(path, map_location="cpu", weights_only=True)
-    if payload.get("format") != "njord-checkpoint-v1":
-        raise ValueError(f"{path} is not a Njord checkpoint")
+    if payload.get("format") not in ("vetra-checkpoint-v1", "njord-checkpoint-v1"):  # v1.0.0 files used the old name
+        raise ValueError(f"{path} is not a Vetra checkpoint")
     config = payload["config"]
     model = build_model(config, freq_num=config["freq_num"], direction_num=config["direction_num"])
     model.load_state_dict(payload["model_state_dict"])

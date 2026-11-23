@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Train Njord at one site with the recipe of the paper.
+"""Train Vetra at one site with the recipe of the paper.
 
 Recipe: MSE on log(1+E), Lion optimiser, chronological 80/20 train/validation
 split of the training years, checkpoint chosen by the physical correlation on
@@ -10,7 +10,7 @@ learning rate is multiplied by ``--plateau-factor``; training stops at the
 next stall after ``--max-lr-drops`` reductions, or after ``--epochs``.
 
 At the end, Hs-Gain is fitted on the validation predictions of the best
-weights and stored in the checkpoint ``<out-dir>/njord.pt``.
+weights and stored in the checkpoint ``<out-dir>/vetra.pt``.
 
 Every epoch writes a resume state, so an interrupted run continues with
 ``--resume`` and gives the same result as an uninterrupted one.
@@ -35,12 +35,12 @@ from torch.utils.data import DataLoader
 
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 
-from njord.checkpoint import save_checkpoint
-from njord.data import (WindSpectrumDataset, SpectrumTransform, load_year_arrays, make_sample_indices,
+from vetra.checkpoint import save_checkpoint
+from vetra.data import (WindSpectrumDataset, SpectrumTransform, load_year_arrays, make_sample_indices,
                         split_indices, wind_stats)
-from njord.hs_gain import fit_hs_gain
-from njord.lion import Lion
-from njord.models import build_model
+from vetra.hs_gain import fit_hs_gain
+from vetra.lion import Lion
+from vetra.models import build_model
 
 MONITOR = "val_corr_spectrum"   # physical correlation on the validation data
 
@@ -111,7 +111,7 @@ def improved(value: float, best: float) -> bool:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--site", required=True, help="Site folder under --data-root (see njord.data).")
+    parser.add_argument("--site", required=True, help="Site folder under --data-root (see vetra.data).")
     parser.add_argument("--year", type=int, nargs="+", required=True, help="Training years, e.g. 1993 ... 2021.")
     parser.add_argument("--data-root", default="data")
     parser.add_argument("--out-dir", required=True)
@@ -172,7 +172,7 @@ def main() -> None:
 
     out_dir = Path(args.out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
-    checkpoint_path = out_dir / "njord.pt"
+    checkpoint_path = out_dir / "vetra.pt"
     metrics_path = out_dir / "metrics.csv"
     resume_path = out_dir / "resume_state.pt"
     print(f"device {device}; samples train/val {len(train_dataset)}/{len(val_dataset)}; "

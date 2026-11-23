@@ -1,7 +1,7 @@
 """Lion optimizer (Chen et al., 2023, arXiv:2302.06675).
 
 Self-contained PyTorch implementation of the standard Lion (EvoLved Sign
-Momentum) algorithm — the optimizer used by the Njord standard recipe.
+Momentum) algorithm — the optimizer used by the Vetra standard recipe.
 """
 
 import torch

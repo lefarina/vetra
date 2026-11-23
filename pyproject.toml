@@ -3,8 +3,8 @@ requires = ["setuptools>=64"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "njord"
-version = "1.0.0"
+name = "vetra"
+version = "1.1.0"
 description = "Directional wave spectra at a fixed point from wind histories"
 readme = "README.md"
 license = { file = "LICENSE" }
@@ -13,4 +13,4 @@ requires-python = ">=3.10"
 dependencies = ["numpy", "torch>=2.0"]
 
 [tool.setuptools]
-packages = ["njord"]
+packages = ["vetra"]

@@ -1,4 +1,4 @@
-"""Hs-Gain: optional post-training amplitude correction of Njord spectra.
+"""Hs-Gain: optional post-training amplitude correction of Vetra spectra.
 
 Each predicted spectrum is multiplied by an energy gain looked up from its
 predicted Hs, so the spectral shape is unchanged. The gain is the ratio of true
@@ -14,7 +14,7 @@ from pathlib import Path
 
 import numpy as np
 
-from njord.grid import IOWAGA_FREQUENCIES
+from vetra.grid import IOWAGA_FREQUENCIES
 
 
 def significant_wave_height(spectra: np.ndarray) -> np.ndarray:

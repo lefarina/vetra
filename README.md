@@ -1,10 +1,10 @@
-# Njord
+# Vetra
 
-Njord estimates the directional wave spectrum at a fixed ocean point from the
+Vetra estimates the directional wave spectrum at a fixed ocean point from the
 history of the surface winds. Two 3D U-Net encoders read the winds over an
 ocean basin (10 days on a 2° grid) and around the point (3 days on a 0.5°
 grid), and a convolutional decoder turns their features into the spectrum on
-36 frequencies × 24 directions. Njord is trained on hindcast spectra, one
+36 frequencies × 24 directions. Vetra is trained on hindcast spectra, one
 model per site, and has an optional post-correction, Hs-Gain, that rescales
 the energy of each spectrum according to its significant wave height.
 
@@ -13,6 +13,7 @@ and spectra in the format below can be used.
 
 The code is archived on Zenodo
 ([doi:10.5281/zenodo.24400745](https://doi.org/10.5281/zenodo.24400745)).
+Versions up to 1.0.0 were released under the name Njord.
 
 ## Installation
 
@@ -26,27 +27,27 @@ training; inference runs on a CPU.
 ## Pretrained models
 
 Trained models for four sites are available on Zenodo
-([doi:10.5281/zenodo.23303894](https://doi.org/10.5281/zenodo.23303894)):
+([doi:10.5281/zenodo.23303893](https://doi.org/10.5281/zenodo.23303893)):
 West Bermuda (NDBC 41048), East Gulf (42003), Southwest Hawaii (51002) and
 Stratus (32012). They were trained on 1993 to 2021 and each one is valid only
 for its site. Each file contains the weights, the wind normalisation, the
 Hs-Gain table and a description of the input domains:
 
 ```python
-from njord import load_checkpoint
+from vetra import load_checkpoint
 
-njord = load_checkpoint("njord_southwest_hawaii.pt", device="cuda")
-print(njord.site)                              # point, buoy, wind domains
-spectra = njord.predict(large, local)          # (N, 36, 24), Hs-Gain applied
-raw = njord.predict(large, local, apply_hs_gain=False)
+vetra = load_checkpoint("vetra_southwest_hawaii.pt", device="cuda")
+print(vetra.site)                              # point, buoy, wind domains
+spectra = vetra.predict(large, local)          # (N, 36, 24), Hs-Gain applied
+raw = vetra.predict(large, local, apply_hs_gain=False)
 ```
 
 `large` has shape (N, 80, 2, H, W) and `local` has shape (N, 24, 2, h, w):
 for each of the N spectra, the last 80 and the last 24 three-hourly wind
 fields up to and including the time of the spectrum, prepared as described
-below on the domains given in `njord.site`.
+below on the domains given in `vetra.site`.
 
-## Using Njord at a new site
+## Using Vetra at a new site
 
 ### 1. Prepare the data
 
@@ -68,7 +69,7 @@ The three files of a month must share the same T time steps, every 3 h
   published models use a 2° grid over the ocean basin that sends swell to the
   site, and a 0.5° grid over the site ± 20° (81 × 81).
 - **Spectra**: energy density E(f, θ) in m² s rad⁻¹ on the grid of
-  `njord/grid.py`: the 36 frequencies (0.0339 to 0.9527 Hz) and 24
+  `vetra/grid.py`: the 36 frequencies (0.0339 to 0.9527 Hz) and 24
   directions of the IOWAGA WAVEWATCH III hindcast point output (Ifremer).
   Spectra from another source must be interpolated onto this grid.
 
@@ -101,7 +102,7 @@ validation data. The learning rate follows RR-4 (restore and reduce): after
 four epochs without improvement, the best weights are restored and the
 learning rate is multiplied by 0.2, at most four times. At the end, Hs-Gain
 is fitted on the validation data. The model, the normalisation and the
-Hs-Gain table are written to `runs/mysite/njord.pt`, which `load_checkpoint`
+Hs-Gain table are written to `runs/mysite/vetra.pt`, which `load_checkpoint`
 reads as above. An interrupted run continues with `--resume`.
 
 The published models were trained on 29 years; with fewer years the model
@@ -116,7 +117,7 @@ pytest tests
 
 ## Citation
 
-If you use Njord, please cite:
+If you use Vetra, please cite:
 
 > Farina, L. Can Winds Alone Predict Ocean Wave Spectra? Submitted.
 

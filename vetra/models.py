@@ -1,4 +1,4 @@
-"""The Njord model: two 3D U-Net wind encoders and a spectral decoder."""
+"""The Vetra model: two 3D U-Net wind encoders and a spectral decoder."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import torch
 import torch.nn.functional as F
 from torch import nn
 
-from njord.unet3d import UNet3d
+from vetra.unet3d import UNet3d
 
 
 def _make_spatial_decoder(
@@ -43,7 +43,7 @@ def _make_spatial_decoder(
     return nn.Sequential(*layers)
 
 
-class NjordEncoderBranch(nn.Module):
+class VetraEncoderBranch(nn.Module):
     """UNet3d encoder that collapses (T, H, W) to a (feature_hw, feature_hw) feature map."""
 
     def __init__(self, unet_out: int = 32, feature_hw: int = 8) -> None:
@@ -59,7 +59,7 @@ class NjordEncoderBranch(nn.Module):
         return x.mean(dim=2)             # (B, unet_out, feature_hw, feature_hw)
 
 
-class Njord(nn.Module):
+class Vetra(nn.Module):
     """Basin and local wind histories -> directional spectrum in log(1+E)."""
 
     def __init__(
@@ -74,8 +74,8 @@ class Njord(nn.Module):
         super().__init__()
         self.freq_num = freq_num
         self.direction_num = direction_num
-        self.large_branch = NjordEncoderBranch(unet_out=unet_out, feature_hw=feature_hw)
-        self.local_branch = NjordEncoderBranch(unet_out=unet_out, feature_hw=feature_hw)
+        self.large_branch = VetraEncoderBranch(unet_out=unet_out, feature_hw=feature_hw)
+        self.local_branch = VetraEncoderBranch(unet_out=unet_out, feature_hw=feature_hw)
         merged = self.large_branch.out_channels + self.local_branch.out_channels
         self.decoder = _make_spatial_decoder(merged, freq_num, direction_num, decoder_width, decoder_dropout)
 
@@ -84,9 +84,9 @@ class Njord(nn.Module):
         return self.decoder(merged).squeeze(1)
 
 
-def build_model(config: dict, freq_num: int = 36, direction_num: int = 24) -> Njord:
-    """Build Njord from a checkpoint or command-line configuration."""
-    return Njord(
+def build_model(config: dict, freq_num: int = 36, direction_num: int = 24) -> Vetra:
+    """Build Vetra from a checkpoint or command-line configuration."""
+    return Vetra(
         freq_num=freq_num,
         direction_num=direction_num,
         unet_out=config.get("unet_out", 32),

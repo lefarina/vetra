@@ -1,6 +1,6 @@
 import torch
 
-from njord.models import Njord, build_model
+from vetra.models import Vetra, build_model
 
 
 def test_output_shape_and_parameter_count():
@@ -15,7 +15,7 @@ def test_output_shape_and_parameter_count():
 
 
 def test_small_model_runs_on_cpu():
-    model = Njord(unet_out=4).eval()
+    model = Vetra(unet_out=4).eval()
     with torch.no_grad():
         out = model(torch.randn(1, 80, 2, 16, 16), torch.randn(1, 24, 2, 16, 16))
     assert torch.isfinite(out).all()

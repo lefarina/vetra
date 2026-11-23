@@ -20,7 +20,7 @@ class WindStats:
 
 @dataclass(frozen=True)
 class SpectrumTransform:
-    """Target transform. Njord is trained on log(1 + E)."""
+    """Target transform. Vetra is trained on log(1 + E)."""
 
     name: str = "log1p"
 
@@ -51,7 +51,7 @@ def load_year_arrays(site: str, year: int | list[int], data_root: str | Path = "
 
     The three files of a month share the same T time steps, every 3 h. Winds
     are the signed squares (u|u|, v|v|) of the 10-m wind components, on any
-    grids of at least 16 x 16 points. Spectra are on the grid of ``njord.grid``.
+    grids of at least 16 x 16 points. Spectra are on the grid of ``vetra.grid``.
     Returns ``(large, local, target)`` concatenated in ascending year order.
     """
     years = [year] if isinstance(year, int) else sorted(year)

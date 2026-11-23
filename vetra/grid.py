@@ -1,4 +1,4 @@
-"""Spectral grid of the IOWAGA hindcast point spectra used as Njord targets."""
+"""Spectral grid of the IOWAGA hindcast point spectra used as Vetra targets."""
 
 import numpy as np
 

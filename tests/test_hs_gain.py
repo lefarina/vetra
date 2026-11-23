@@ -1,6 +1,6 @@
 import numpy as np
 
-from njord.hs_gain import HsGain, fit_hs_gain, significant_wave_height
+from vetra.hs_gain import HsGain, fit_hs_gain, significant_wave_height
 
 
 def test_fit_recovers_constant_gain_and_keeps_shape(tmp_path):
@@ -30,6 +30,6 @@ def test_gain_is_monotone_and_constant_beyond_fitted_range():
 
 
 def test_isotonic_pools_violators_instead_of_carrying_the_maximum():
-    from njord.hs_gain import isotonic_increasing
+    from vetra.hs_gain import isotonic_increasing
     fitted = isotonic_increasing(np.array([1.3, 1.0, 1.1, 1.2]), np.ones(4))
     np.testing.assert_allclose(fitted, [3.4 / 3, 3.4 / 3, 3.4 / 3, 1.2])
